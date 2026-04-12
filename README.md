@@ -1,8 +1,5 @@
 # Metamorphic Testing for Quantum Programs (CSI 5370 Project)
 
-Individual course project – Winter 2026  
-**Student:** Elira Shaska – elirashaska@oakland.edu
-
 ## Project Overview
 
 This project investigates metamorphic testing for quantum programs using Qiskit. The goal is to explore whether metamorphic relations can be used to detect inconsistencies, anomalous behavior, or potential bugs in quantum software when a traditional test oracle is difficult to define.
