@@ -1,0 +1,7 @@
+qiskit>=1.2.0
+qiskit-aer>=0.15.0
+matplotlib>=3.8
+numpy>=1.26
+scipy>=1.13
+pandas>=2.2
+seaborn>=0.13

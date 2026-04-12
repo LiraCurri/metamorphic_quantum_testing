@@ -1,0 +1,8 @@
+relation,type,mean_delta_E,std_delta_E,mean_sym_diff,mean_param_diff,detection_rate
+identity,valid,0.0,0.0,0.0,0.0,0.0
+barrier,valid,0.0,0.0,0.0,0.0,0.0
+identity_xx,valid,0.0,0.0,0.0,0.0,0.0
+fault_x,fault,0.140858,0.222889,0.44492,2.115682,100.0
+fault_replace_rot,fault,0.017565,0.025065,0.025243,0.685376,100.0
+fault_shift_param,fault,0.115485,0.12109,0.158938,1.048933,100.0
+fault_change_entanglement,fault,0.031867,0.024209,0.094569,1.887582,100.0
