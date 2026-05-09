@@ -1,8 +1,7 @@
 from qiskit import QuantumCircuit
 import random
 
-GATES = ["h", "x", "z", "cx"]
-
+GATES = ["h", "x", "z", "rx", "ry", "rz", "cx"]
 
 def generate_random_circuit(num_qubits=3, depth=5, add_measurements=False, seed=None):
     """
