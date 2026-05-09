@@ -1,0 +1,8 @@
+relation,type,num_qubits,reps,maxiter,mean_delta_E,std_delta_E,mean_avg_energy_diff,mean_max_energy_diff,mean_sym_diff,mean_max_sym_diff,mean_param_diff,mean_max_param_diff,detection_rate
+identity,valid,6,3,160,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+barrier,valid,6,3,160,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+identity_xx,valid,6,3,160,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+fault_x,fault,6,3,160,0.429371,0.392849,0.761043,2.138489,0.66128,1.972455,3.489907,5.00272,100.0
+fault_replace_rot,fault,6,3,160,0.199697,0.215027,0.164937,1.001793,0.112469,0.910974,1.309614,2.426745,100.0
+fault_shift_param,fault,6,3,160,0.210204,0.174581,0.24184,1.132757,0.180506,1.03191,2.225396,3.42226,100.0
+fault_change_entanglement,fault,6,3,160,0.385969,0.254278,0.295219,1.252499,0.15701,1.139241,3.229422,4.301632,100.0

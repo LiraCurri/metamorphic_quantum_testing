@@ -1,0 +1,7 @@
+phase,type,mean_delta_E,mean_sym_diff,mean_param_diff,mean_detection_rate
+noisy_shot_based,fault,0.22392600000000001,0.18516975,1.8922275,100.0
+noisy_shot_based,valid,0.11328133333333333,0.04540633333333333,1.7300973333333332,100.0
+shot_based,fault,0.2709475,0.22388825,1.863053,100.0
+shot_based,valid,0.200244,0.04602900000000001,1.664057,100.0
+statevector,fault,0.18550525,0.20483125,2.19451,100.0
+statevector,valid,0.0,0.0,0.0,0.0

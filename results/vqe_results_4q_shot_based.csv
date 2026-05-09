@@ -1,0 +1,10 @@
+phase,relation,type,num_qubits,reps,maxiter,shots,optimizer,oracle_variant,noise_model,energy_threshold,symmetry_threshold,param_threshold,mean_delta_E,std_delta_E,mean_avg_energy_diff,mean_max_energy_diff,mean_sym_diff,mean_max_sym_diff,mean_param_diff,mean_max_param_diff,detection_rate
+shot_based,identity,valid,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+shot_based,barrier,valid,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+shot_based,identity_xx,valid,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+shot_based,fault_x,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,1.117139,1.276764,1.204374,1.97124,1.073426,1.771582,1.118636,1.916724,100.0
+shot_based,fault_replace_rot,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.058154,0.064857,0.057605,0.258447,0.032669,0.212109,0.387262,0.686801,100.0
+shot_based,fault_replace_rot_strong,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.901172,0.598058,0.943111,1.787988,0.70474,1.611816,1.853296,2.678795,100.0
+shot_based,fault_shift_param,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.23457,0.138519,0.227425,0.571045,0.101734,0.423828,0.699297,1.121306,100.0
+shot_based,fault_shift_param_strong,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.737158,0.607019,0.789964,1.422949,0.604455,1.286816,0.796532,1.40722,100.0
+shot_based,fault_change_entanglement,fault,4,5,60,2048,SPSA,deltaE_or_avgSym,none,0.05,0.01,inf,0.211377,0.137283,0.190888,0.698193,0.088501,0.507812,1.082399,1.822009,100.0

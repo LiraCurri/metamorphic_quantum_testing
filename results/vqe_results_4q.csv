@@ -1,0 +1,10 @@
+relation,type,mean_delta_E,std_delta_E,mean_avg_energy_diff,mean_max_energy_diff,mean_sym_diff,mean_max_sym_diff,mean_param_diff,mean_max_param_diff,detection_rate
+identity,valid,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+barrier,valid,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+identity_xx,valid,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+fault_x,fault,0.22841,0.216641,0.55491,2.009532,0.395848,1.711397,3.06778,4.175201,100.0
+fault_replace_rot,fault,0.06836,0.069643,0.105566,0.919561,0.078148,0.845041,1.085081,2.164741,100.0
+fault_shift_param,fault,0.163269,0.152212,0.245844,1.091033,0.184149,0.97041,1.795452,2.96053,100.0
+fault_change_entanglement,fault,0.281982,0.190702,0.260649,1.200008,0.16118,1.016901,2.829727,4.072373,100.0
+fault_replace_rot_strong,fault,0.302711,0.236967,0.572032,1.654105,0.526516,1.548795,3.648947,4.977317,100.0
+fault_shift_param_strong,fault,0.331737,0.262484,0.636484,1.820952,0.593471,1.787473,3.421922,4.790317,100.0
