@@ -260,4 +260,8 @@ def evaluate_vqe_pair_noisy(
         "energy_violation": bool(energy_violation),
         "symmetry_violation": bool(symmetry_violation),
         **trace_metrics,
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> c6014f9 (Update final experiments, notebooks, and results)
