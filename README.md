@@ -1,26 +1,37 @@
-# Metamorphic Testing for Quantum Programs (CSI 5370 Project)
+# Metamorphic Testing for Quantum Programs
 
-## Project Overview
+## Overview
 
-This project investigates metamorphic testing for quantum programs using Qiskit. The goal is to explore whether metamorphic relations can be used to detect inconsistencies, anomalous behavior, or potential bugs in quantum software when a traditional test oracle is difficult to define.
+This repository contains an implementation of a metamorphic testing framework for quantum software in Qiskit. The framework is designed for oracle-poor settings, where exact expected outputs are unavailable or difficult to define.
 
-The current implementation focuses on small quantum circuits executed with the Qiskit Aer simulator. Source circuits are generated, transformed according to selected metamorphic relations, executed, and then compared using measurement distributions.
+The implementation covers two complementary validation settings:
 
-## Project Structure
+- **Circuit-level validation**, where source and follow-up circuits are compared through statistical analysis of measurement distributions.
+- **Hybrid quantum-classical validation**, with a focus on the **Variational Quantum Eigensolver (VQE)**, where metamorphic testing is extended beyond final outputs to include optimization trajectories and physics-aware constraints.
+
+For hybrid validation, the framework incorporates gray-box execution traces and symmetry-aware comparison. The VQE evaluation is studied across three execution regimes:
+
+- deterministic statevector simulation,
+- shot-based simulation,
+- noisy shot-based simulation with controlled noise models.
+
+These experiments are used to examine how metamorphic validation changes as execution moves from idealized conditions to more realistic stochastic and hardware-inspired settings.
+
+## Repository Structure
 
 ```text
 metamorphic_quantum_testing/
 │
-├── notebooks/                # Jupyter notebooks for experiments
-├── results/                 # Saved experiment outputs, CSV files and figures
+├── notebooks/                 # Notebooks for setup checks, examples, experiments, and analysis
+├── results/                   # Saved CSV outputs, plots, and generated figures
 ├── src/
-│   ├── analyzer.py          # Records and summarizes experiment results
-│   ├── checker.py           # Compares output distributions
-│   ├── circuit_generator.py # Generates source circuits
-│   ├── runners.py            # Executes circuits with Qiskit Aer
-│   └── transformations.py   # Metamorphic transformations
+│   ├── analyzer.py            # Aggregation and summarization of experiment results
+│   ├── checker.py             # Circuit-level and hybrid metamorphic oracles
+│   ├── circuit_generator.py   # Random circuit generation utilities
+│   ├── runners.py             # Circuit and VQE execution with Qiskit Aer
+│   └── transformations.py     # Circuit-level and VQE transformations
 │
-├── main.py                  # Minimal entry point
+├── main.py                    # Minimal entry point
 ├── README.md
 └── requirements.txt
 ```
