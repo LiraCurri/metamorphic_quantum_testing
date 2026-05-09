@@ -4,9 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-# =========================
 # CIRCUIT-LEVEL CHECKING
-# =========================
 
 def counts_to_probabilities(counts: Dict[str, int]) -> Dict[str, float]:
     """
@@ -91,20 +89,13 @@ def print_comparison(
         print(f"{s:>5} | {prob1:11.4f} | {prob2:14.4f} | {diff:6.4f}")
 
 
-# =========================
 # VQE TRACE CHECKING
-# =========================
 
 def compare_vqe_traces(source_trace: pd.DataFrame, follow_trace: pd.DataFrame) -> Dict[str, float]:
     """
     Compare VQE optimization traces.
 
-    Expected columns:
-        source_trace["energy"]
-        source_trace["symmetry"]
-        source_trace["params"]   # each row is a numpy array / list
-
-    Returns average and maximum differences across the aligned trace.
+    Handles unequal parameter-vector lengths by comparing only the shared prefix.
     """
     n = min(len(source_trace), len(follow_trace))
     if n == 0:
@@ -116,6 +107,7 @@ def compare_vqe_traces(source_trace: pd.DataFrame, follow_trace: pd.DataFrame) -
     energy_diffs = []
     sym_diffs = []
     param_diffs = []
+    param_dim_mismatch = False
 
     for i in range(n):
         src = source_trace.iloc[i]
@@ -126,7 +118,12 @@ def compare_vqe_traces(source_trace: pd.DataFrame, follow_trace: pd.DataFrame) -
 
         src_params = np.asarray(src["params"], dtype=float)
         fol_params = np.asarray(fol["params"], dtype=float)
-        param_diffs.append(np.linalg.norm(src_params - fol_params))
+
+        if len(src_params) != len(fol_params):
+            param_dim_mismatch = True
+
+        k = min(len(src_params), len(fol_params))
+        param_diffs.append(np.linalg.norm(src_params[:k] - fol_params[:k]))
 
     return {
         "avg_energy_diff": float(np.mean(energy_diffs)),
@@ -136,8 +133,8 @@ def compare_vqe_traces(source_trace: pd.DataFrame, follow_trace: pd.DataFrame) -
         "avg_param_diff": float(np.mean(param_diffs)),
         "max_param_diff": float(np.max(param_diffs)),
         "trace_len": int(n),
+        "param_dim_mismatch": bool(param_dim_mismatch),
     }
-
 
 def check_vqe_violation(
     source_result: Any,
@@ -155,21 +152,29 @@ def check_vqe_violation(
     - maximum symmetry deviation along the path
     - maximum parameter deviation along the path
 
-    Returns:
-        (violation, metrics_dict)
+    Also returns separate flags so we can see which part of the oracle
+    caused the violation.
     """
     delta_E = abs(float(source_result.fun) - float(follow_result.fun))
 
+    energy_violation = delta_E > energy_threshold
+    symmetry_violation = trace_metrics["max_sym_diff"] > symmetry_threshold
+    param_violation = trace_metrics["max_param_diff"] > param_threshold
+
     violation = (
-        delta_E > energy_threshold
-        or trace_metrics["max_sym_diff"] > symmetry_threshold
-        or trace_metrics["max_param_diff"] > param_threshold
+        energy_violation
+        or symmetry_violation
+        or param_violation
     )
 
     metrics = {
         "delta_E": float(delta_E),
-        **trace_metrics
+        "energy_violation": bool(energy_violation),
+        "symmetry_violation": bool(symmetry_violation),
+        "param_violation": bool(param_violation),
+        **trace_metrics,
     }
+
     return violation, metrics
 
 
@@ -198,4 +203,61 @@ def evaluate_vqe_pair(
     return {
         "violation": violation,
         **metrics,
+    }
+
+def evaluate_vqe_pair_shot_based(
+    source_result,
+    follow_result,
+    source_trace,
+    follow_trace,
+    energy_threshold: float = 5e-2,
+    symmetry_threshold: float = 1e-2,
+):
+    trace_metrics = compare_vqe_traces(source_trace, follow_trace)
+
+    delta_E = abs(float(source_result.fun) - float(follow_result.fun))
+
+    energy_violation = delta_E > energy_threshold
+    symmetry_violation = trace_metrics["avg_sym_diff"] > symmetry_threshold
+
+    violation = energy_violation or symmetry_violation
+
+    return {
+        "violation": bool(violation),
+        "delta_E": float(delta_E),
+        "energy_violation": bool(energy_violation),
+        "symmetry_violation": bool(symmetry_violation),
+        **trace_metrics,
+    }
+
+
+def evaluate_vqe_pair_noisy(
+    source_result,
+    follow_result,
+    source_trace: pd.DataFrame,
+    follow_trace: pd.DataFrame,
+    energy_threshold: float,
+    symmetry_threshold: float,
+):
+    """
+    Noisy oracle:
+    - final energy difference
+    - average symmetry deviation
+    Parameter-path is recorded but not used as active criterion.
+    """
+    trace_metrics = compare_vqe_traces(source_trace, follow_trace)
+
+    delta_E = abs(float(source_result.fun) - float(follow_result.fun))
+
+    energy_violation = delta_E > energy_threshold
+    symmetry_violation = trace_metrics["avg_sym_diff"] > symmetry_threshold
+
+    violation = energy_violation or symmetry_violation
+
+    return {
+        "violation": bool(violation),
+        "delta_E": float(delta_E),
+        "energy_violation": bool(energy_violation),
+        "symmetry_violation": bool(symmetry_violation),
+        **trace_metrics,
     }
