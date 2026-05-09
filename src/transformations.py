@@ -1,14 +1,13 @@
 from qiskit import QuantumCircuit
 from qiskit.circuit import CircuitInstruction
 from qiskit.circuit.library import RXGate, RYGate, RZGate, XGate
+from qiskit.circuit.library import HGate
+
 import random
-from qiskit.circuit import QuantumCircuit, CircuitInstruction
 import numpy as np
 
 
-# =========================
 # CIRCUIT-LEVEL RELATIONS
-# =========================
 
 def identity_transformation(qc: QuantumCircuit, seed: int | None = None) -> QuantumCircuit:
     if seed is not None:
@@ -81,9 +80,19 @@ def commute_independent(qc: QuantumCircuit, seed: int | None = None) -> QuantumC
             return transformed
 
     return transformed
-# =========================
+
+def global_phase_shift(qc: QuantumCircuit, phase: float = np.pi / 3, seed: int | None = None) -> QuantumCircuit:
+    """
+    Valid metamorphic relation: add a global phase.
+
+    A global phase does not change measurement probabilities,
+    expectation values, or VQE optimization behavior.
+    """
+    new = qc.copy()
+    new.global_phase += phase
+    return new
+    
 # CIRCUIT FAULTS
-# =========================
 
 def fault_add_x(qc: QuantumCircuit, seed: int | None = None) -> QuantumCircuit:
     """
@@ -177,9 +186,75 @@ def fault_change_target_qubit(qc: QuantumCircuit, seed: int | None = None) -> Qu
 
     return new
 
-# =========================
+
+def fault_phase_before_h(qc: QuantumCircuit, angle: float = np.pi / 2, seed: int | None = None) -> QuantumCircuit:
+    """
+    Fault: insert a local RZ phase before an existing H gate.
+
+    This makes the relative phase more likely to become observable,
+    because the following H gate converts phase differences into
+    amplitude differences in the computational basis.
+    """
+    rng = np.random.default_rng(seed)
+    new = qc.copy()
+
+    candidates = [
+        i for i, instr in enumerate(new.data)
+        if instr.operation.name == "h" and len(instr.qubits) == 1
+    ]
+
+    if not candidates:
+        return fault_add_x(qc, seed=seed)
+
+    idx = int(rng.choice(candidates))
+    qubit = new.data[idx].qubits[0]
+
+    rz_instr = CircuitInstruction(
+        operation=RZGate(angle),
+        qubits=(qubit,),
+        clbits=(),
+    )
+
+    new.data.insert(idx, rz_instr)
+
+    return new
+
+
+def fault_relative_phase(
+    qc: QuantumCircuit,
+    angle: float = np.pi / 4,
+    seed: int | None = None,
+) -> QuantumCircuit:
+    """
+    Fault: insert a local RZ phase rotation on a random qubit.
+
+    Unlike a global phase, a local relative phase can change interference
+    patterns and expectation values.
+    """
+    rng = np.random.default_rng(seed)
+    new = qc.copy()
+
+    if new.num_qubits == 0:
+        return new
+
+    q_idx = int(rng.integers(0, new.num_qubits))
+    qubit = new.qubits[q_idx]
+
+    # For VQE ansatz circuits, there are usually no measurements.
+    insert_pos = int(rng.integers(0, len(new.data) + 1))
+
+    rz_instr = CircuitInstruction(
+        operation=RZGate(angle),
+        qubits=(qubit,),
+        clbits=(),
+    )
+
+    new.data.insert(insert_pos, rz_instr)
+
+    return new
+
+    
 # VQE VALID RELATIONS
-# =========================
 
 def vqe_identity(ansatz: QuantumCircuit) -> QuantumCircuit:
     """
@@ -212,10 +287,14 @@ def vqe_identity_xx(ansatz: QuantumCircuit, qubit: int = 0) -> QuantumCircuit:
         new.x(q)
     return new
 
+def vqe_global_phase(ansatz: QuantumCircuit, phase: float = np.pi / 3, seed: int | None = None) -> QuantumCircuit:
+    """
+    Valid VQE relation: add a global phase to the ansatz.
+    """
+    return global_phase_shift(ansatz, phase=phase, seed=seed)
 
-# =========================
+
 # VQE FAULTS
-# =========================
 
 def vqe_fault_x(ansatz: QuantumCircuit, seed: int | None = None) -> QuantumCircuit:
     """
@@ -337,3 +416,110 @@ def vqe_fault_change_entanglement(ansatz: QuantumCircuit, seed: int | None = Non
         del new.data[idx]
 
     return new
+
+def vqe_fault_relative_phase(ansatz: QuantumCircuit, angle: float = np.pi / 4, seed: int | None = None) -> QuantumCircuit:
+    """
+    VQE fault: insert a local RZ phase rotation into the ansatz.
+    """
+    return fault_relative_phase(ansatz, angle=angle, seed=seed)
+
+
+def _middle_indices(indices, total_len, fraction=0.5):
+    """
+    Keep only indices that fall in the middle fraction of the circuit.
+    Example: fraction=0.5 keeps the middle 50%.
+    """
+    if not indices:
+        return []
+
+    start = int((1 - fraction) / 2 * total_len)
+    end = int((1 + fraction) / 2 * total_len)
+
+    middle = [i for i in indices if start <= i < end]
+    return middle if middle else indices
+
+
+def vqe_fault_replace_rotation_strong(ansatz: QuantumCircuit, seed: int | None = None) -> QuantumCircuit:
+    """
+    Stronger fault: replace one middle-circuit rotation gate with H.
+    This is much more disruptive than RX->RY or RY->RZ.
+    """
+    rng = np.random.default_rng(seed)
+    new = ansatz.copy()
+
+    candidates = [
+        i for i, instr in enumerate(new.data)
+        if instr.operation.name in ["rx", "ry", "rz"] and len(instr.qubits) == 1
+    ]
+
+    if not candidates:
+        return vqe_fault_x(new, seed=seed)
+
+    candidates = _middle_indices(candidates, len(new.data), fraction=0.5)
+
+    idx = int(rng.choice(candidates))
+    instr = new.data[idx]
+    qubit = instr.qubits[0]
+
+    new.data[idx] = CircuitInstruction(
+        operation=HGate(),
+        qubits=(qubit,),
+        clbits=instr.clbits
+    )
+
+    return new
+
+def vqe_fault_shift_parameter_strong(
+    ansatz: QuantumCircuit,
+    shift: float = np.pi / 2,
+    seed: int | None = None,
+    num_mutations: int = 2,
+) -> QuantumCircuit:
+    """
+    Stronger parameter-shift fault:
+    - targets middle-circuit rotation gates
+    - applies a larger shift
+    - can mutate multiple gates
+    """
+    rng = np.random.default_rng(seed)
+    new = ansatz.copy()
+
+    candidates = [
+        i for i, instr in enumerate(new.data)
+        if instr.operation.name in ["rx", "ry", "rz"] and len(instr.qubits) == 1
+    ]
+
+    if not candidates:
+        return new
+
+    candidates = _middle_indices(candidates, len(new.data), fraction=0.5)
+
+    chosen = rng.choice(
+        candidates,
+        size=min(num_mutations, len(candidates)),
+        replace=False
+    )
+
+    for idx in chosen:
+        idx = int(idx)
+        instr = new.data[idx]
+
+        qubit = instr.qubits[0]
+        old_param = instr.operation.params[0]
+        new_param = old_param + shift
+
+        if instr.operation.name == "rx":
+            new_gate = RXGate(new_param)
+        elif instr.operation.name == "ry":
+            new_gate = RYGate(new_param)
+        else:
+            new_gate = RZGate(new_param)
+
+        new.data[idx] = CircuitInstruction(
+            operation=new_gate,
+            qubits=(qubit,),
+            clbits=instr.clbits
+        )
+
+    return new
+
