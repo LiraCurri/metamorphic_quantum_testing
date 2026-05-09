@@ -18,9 +18,7 @@ class ResultAnalyzer:
         self.df = pd.DataFrame()
         self.start_time = time.time()
 
-    # -------------------------
     # CIRCUIT RECORDING
-    # -------------------------
     def record(
         self,
         test_id: int,
@@ -41,9 +39,7 @@ class ResultAnalyzer:
         self.records.append(entry)
         self.df = pd.DataFrame(self.records)
 
-    # -------------------------
     # VQE RECORDING
-    # -------------------------
     def record_vqe(
         self,
         test_id: int,
@@ -76,9 +72,7 @@ class ResultAnalyzer:
         self.records.append(entry)
         self.df = pd.DataFrame(self.records)
 
-    # -------------------------
     # SUMMARY
-    # -------------------------
     def summary(self):
         """Print high-level experiment statistics."""
         if self.df.empty:
@@ -116,9 +110,7 @@ class ResultAnalyzer:
 
         print("============================\n")
 
-    # -------------------------
     # RELATION BREAKDOWN
-    # -------------------------
     def relation_breakdown(self):
         """Show statistics grouped by metamorphic relation."""
         if self.df.empty:
@@ -152,9 +144,7 @@ class ResultAnalyzer:
 
             print()
 
-    # -------------------------
     # EXPORT
-    # -------------------------
     def export_csv(self, filename: str | None = None):
         """Save experiment data to CSV (timestamped by default)."""
         if self.df.empty:
@@ -168,9 +158,7 @@ class ResultAnalyzer:
         self.df.to_csv(filename, index=False)
         print(f"Results exported to {filename}")
 
-    # -------------------------
     # RUNTIME
-    # -------------------------
     def runtime(self):
         """Return total experiment runtime."""
         return time.time() - self.start_time
