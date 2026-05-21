@@ -260,8 +260,22 @@ def evaluate_vqe_pair_noisy(
         "energy_violation": bool(energy_violation),
         "symmetry_violation": bool(symmetry_violation),
         **trace_metrics,
-<<<<<<< HEAD
     }
-=======
+    
+def evaluate_vqe_pair_energy_only(
+    source_result,
+    follow_result,
+    energy_threshold: float,
+):
+    """
+    Baseline oracle:
+    only checks final energy difference.
+    """
+    delta_E = abs(float(source_result.fun) - float(follow_result.fun))
+    energy_violation = delta_E > energy_threshold
+
+    return {
+        "violation": bool(energy_violation),
+        "delta_E": float(delta_E),
+        "energy_violation": bool(energy_violation),
     }
->>>>>>> c6014f9 (Update final experiments, notebooks, and results)

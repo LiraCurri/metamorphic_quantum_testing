@@ -671,8 +671,4 @@ def build_combined_noise_model(
 
     noise_model.add_all_qubit_readout_error(readout_error)
 
-<<<<<<< HEAD
     return noise_model
-=======
-    return noise_model
->>>>>>> c6014f9 (Update final experiments, notebooks, and results)
